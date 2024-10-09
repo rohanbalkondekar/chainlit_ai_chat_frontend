@@ -15,27 +15,54 @@ API_TIMEOUT = 60  # API Will Timeout in 60 Seconds
 log_level = os.getenv("LOG_LEVEL", "INFO").upper()
 FASTAPI_URL = os.getenv("FASTAPI_URL")
 
-messages = []
-settings = None
+messages = []  # List to store chat messages
+settings = None  # Variable to store chat settings
 
 
 @app.get("/health/live")
 async def liveness_probe():
+    """
+    Health check endpoint to verify if the service is live.
+
+    Returns:
+        JSONResponse: A JSON response indicating the service status.
+    """
     return JSONResponse({"status": "live"})
 
 
 @app.get("/health/ready")
 async def readiness_probe():
+    """
+    Health check endpoint to verify if the service is ready to accept requests.
+
+    Returns:
+        JSONResponse: A JSON response indicating the service status.
+    """
     return JSONResponse({"status": "ready"})
 
 
 @app.get("/health/startup")
 async def startup_probe():
+    """
+    Health check endpoint to verify if the service has started successfully.
+
+    Returns:
+        JSONResponse: A JSON response indicating the service status.
+    """
     return JSONResponse({"status": "live"})
 
 
 @cl.on_chat_start
 async def start():
+    """
+    Initializes the chat settings and clears previous messages if specified.
+
+    This function sets up the chat model, language, and whether to clear
+    previous messages upon page refresh. It also initializes the messages list.
+
+    Returns:
+        None
+    """
     global settings
     global messages
     settings = await cl.ChatSettings(
@@ -62,11 +89,21 @@ async def start():
 
     if settings["Clear Chat"] is True:
         # Start a Fresh Conversation
-        messages = []
+        messages = []  # Clear previous messages
 
 
 @cl.on_message
 async def main(message: cl.Message):
+    """
+    Handles incoming messages from the user, processes them, and sends a request
+    to the FastAPI backend for a response.
+
+    Args:
+        message (cl.Message): The message object containing the user's input.
+
+    Returns:
+        None
+    """
     global settings
     global messages
     # Initialize the content list with the user's text message
